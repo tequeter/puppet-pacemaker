@@ -19,6 +19,14 @@ module Pacemaker
           end
         rescue => e
           debug "Execution failure: #{e.message}"
+          # FIXME: Puppet's shell command methods fail to return the exit code.
+          # This hack fails on a few known hard errors, errors that shouldn't
+          # be retried at all. We should have our own exec subsystem returning
+          # the exit code and its type. Fortunately Puppetlabs doesn't seem to
+          # translate this message.
+          if e.message =~ /' returned 203: / then
+            raise e
+          end
         end
         sleep options[:retry_step]
       end
