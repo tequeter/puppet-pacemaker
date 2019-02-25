@@ -122,6 +122,10 @@ Example:
 }
 ```
 
+Status-related meta-attributes are not managed by this module and will be
+ignored even if specified. These are `target-role` and `is-managed`, see
+`status_meta_attributes` in `options.yaml`.
+
 #### complex_type
 
 A primitive can be either a *simple* one, and run only as a single
@@ -141,6 +145,8 @@ Example:
   'master-max' => '1',
 }
 ```
+
+See also *metadata* with regard to ignored attributes.
 
 #### debug
 
