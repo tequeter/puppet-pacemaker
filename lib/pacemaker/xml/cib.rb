@@ -77,6 +77,42 @@ module Pacemaker
       cibadmin_safe options, '--xml-text', xml.to_s
     end
 
+    class ExecutionFailure < Puppet::ExecutionFailure
+      attr_reader :exitstatus
+      attr_reader :can_be_retried
+
+      def initialize(message, exitstatus)
+        super(message)
+        @exitstatus = exitstatus
+        @can_be_retried =
+          case exitstatus
+          # pcmk_err_schema_validation, returned for impossible CIB changes on
+          # Pacemaker 1.1.
+          when 203
+            false
+          # CRM_EX_CONFIG, presumably returned for pcmk_err_schema_validation
+          # and pcmk_err_transform_failed on Pacemaker 2.0.
+          when 78
+            false
+          else
+            true
+          end
+      end
+    end
+
+    # Executes cibadmin, raising a Pacemaker::Cib::ExecutionFailure if
+    # cibadmin returns non-zero. Unlike the default exception class, this one
+    # also contains the return code.
+    def detailed_cibadmin(*args)
+      command_array = ['cibadmin'] + args
+      command = command_array.flatten.map(&:to_s).join(' ') # Straight from Puppet::Util::Execution
+
+      result = Puppet::Util::Execution.execute(, { failonfail: false, combine: true })
+      raise ExecutionFailure, "Execution of '#{command}' returned #{result.exitstatus}: #{result.strip}", result.exitstatus unless result.exitstatus == 0
+
+      return result
+    end
+
     # get the name of the DC (Designated Controller) node
     # used to determine if the cluster have elected one and is ready
     # @return [String, nil]

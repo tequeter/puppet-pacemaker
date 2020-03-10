@@ -40,7 +40,8 @@ module Pacemaker
     # @param args [Array] command arguments
     # @return [String,NilClass]
     def cibadmin_safe(*args)
-      safe_method :cibadmin, *args
+      # XXX: provide an implementation for PacemakerNoop too?
+      safe_method :detailed_cibadmin, *args
     end
 
     # safe crm_node command

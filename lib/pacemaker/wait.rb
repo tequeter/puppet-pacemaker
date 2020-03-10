@@ -17,6 +17,8 @@ module Pacemaker
           else
             return out
           end
+        rescue Pacemaker::Cib::ExecutionFailure => e
+          ... unless e.can_be_retried
         rescue => e
           debug "Execution failure: #{e.message}"
         end
